@@ -34,10 +34,9 @@
       align-items: flex-end;
       padding: 8px;
       width: 100%;
-      -webkit-app-region: drag; /* 按住背景可自由拖拽 */
     }
 
-    /* 常态极简胶囊 (Mini Capsule) */
+    /* 常态极简胶囊 (Mini Capsule) - 支持鼠标任意拖拽移动 */
     .capsule-pill {
       background: var(--bg-capsule);
       backdrop-filter: blur(24px) saturate(190%);
@@ -49,15 +48,18 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      cursor: pointer;
-      -webkit-app-region: no-drag;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: grab;
+      transition: background 0.2s, border-color 0.2s, transform 0.15s;
     }
 
     .capsule-pill:hover {
       background: rgba(30, 34, 42, 0.98);
       border-color: rgba(255, 255, 255, 0.35);
-      transform: scale(1.02);
+    }
+
+    .capsule-pill:active {
+      cursor: grabbing;
+      transform: scale(0.98);
     }
 
     .pill-ring {
@@ -115,7 +117,6 @@
       width: 350px;
       max-width: 350px;
       box-sizing: border-box;
-      -webkit-app-region: no-drag;
       animation: expand-anim 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
@@ -128,7 +129,7 @@
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-    /* 顶部操作条（解决 flex 溢出问题） */
+    /* 顶部操作条 */
     .top-bar-row {
       display: flex;
       align-items: center;
@@ -139,7 +140,7 @@
 
     .select-wrapper {
       flex: 1;
-      min-width: 0; /* 关键：解决 flex item 文本过长导致右侧被顶出屏幕 */
+      min-width: 0;
       position: relative;
     }
 
@@ -172,7 +173,7 @@
 
     /* 醒目的 macOS 红色关闭圆钮 */
     .btn-red-quit {
-      flex-shrink: 0; /* 绝对禁止被压缩或挤出 */
+      flex-shrink: 0;
       width: 22px;
       height: 22px;
       min-width: 22px;
@@ -200,6 +201,11 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 8px;
+      cursor: grab;
+    }
+
+    .card-header:active {
+      cursor: grabbing;
     }
 
     .card-title {
@@ -315,7 +321,7 @@
 </head>
 <body>
   <!-- 极简胶囊 -->
-  <div class="capsule-pill" id="pill-btn" title="点击展开/收起用量卡片">
+  <div class="capsule-pill" id="pill-btn" title="点击展开面板，按住可任意拖拽位置">
     <svg class="pill-ring" viewBox="0 0 36 36">
       <path class="pill-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
       <path class="pill-ring-fill health-optimal" id="ring-fill" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
@@ -337,7 +343,7 @@
       <div class="btn-red-quit" id="btn-quit" title="退出关闭悬浮窗">✕</div>
     </div>
 
-    <div class="card-header">
+    <div class="card-header" id="card-drag-bar" title="按住可拖动窗口">
       <span class="card-title" id="card-title">当前项目</span>
       <span class="card-model" id="card-model">Gemini Flash</span>
     </div>
@@ -379,10 +385,56 @@
     const detailCard = document.getElementById('detail-card');
     const sessionSelect = document.getElementById('session-select');
     const btnQuit = document.getElementById('btn-quit');
+    const cardDragBar = document.getElementById('card-drag-bar');
 
-    pillBtn.addEventListener('click', () => {
-      isOpen = !isOpen;
-      detailCard.classList.toggle('open', isOpen);
+    // === 全局丝滑拖拽系统 (Smooth Drag System) ===
+    let isDragging = false;
+    let hasMoved = false;
+    let dragDist = 0;
+    let lastScreenX = 0;
+    let lastScreenY = 0;
+
+    function initDrag(targetElem, isClickable) {
+      targetElem.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return; // 仅限左键
+        isDragging = true;
+        hasMoved = false;
+        dragDist = 0;
+        lastScreenX = e.screenX;
+        lastScreenY = e.screenY;
+      });
+    }
+
+    initDrag(pillBtn, true);
+    initDrag(cardDragBar, false);
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      const dx = e.screenX - lastScreenX;
+      const dy = e.screenY - lastScreenY;
+      lastScreenX = e.screenX;
+      lastScreenY = e.screenY;
+
+      dragDist += Math.abs(dx) + Math.abs(dy);
+      if (dragDist > 3) {
+        hasMoved = true;
+      }
+
+      // 发送坐标增量给 Cocoa 原生窗口 (macOS 坐标系 Y 轴向下为负，需翻转)
+      if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.capsuleApp) {
+        window.webkit.messageHandlers.capsuleApp.postMessage({ action: 'move', dx: dx, dy: -dy });
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isDragging) {
+        isDragging = false;
+        // 如果只是轻点（位移 < 4px），则执行展开/收起切换
+        if (!hasMoved) {
+          isOpen = !isOpen;
+          detailCard.classList.toggle('open', isOpen);
+        }
+      }
     });
 
     // 红色圆圈关闭按钮

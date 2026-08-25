@@ -19,7 +19,7 @@
 
     NSRect frame = NSMakeRect(x, y, width, height);
 
-    // 创建无边框、浮动面板
+    // 创建无边框透明面板
     self.window = [[NSPanel alloc] initWithContentRect:frame
                                              styleMask:NSWindowStyleMaskBorderless | NSWindowStyleMaskNonactivatingPanel
                                                backing:NSBackingStoreBuffered
@@ -34,13 +34,12 @@
     [self.window setOpaque:NO];
     [self.window setBackgroundColor:[NSColor clearColor]];
     [self.window setHasShadow:NO];
-    [self.window setMovableByWindowBackground:YES]; // 允许鼠标直接按住背景拖动
     [self.window setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces |
                                        NSWindowCollectionBehaviorFullScreenAuxiliary |
                                        NSWindowCollectionBehaviorStationary |
                                        NSWindowCollectionBehaviorIgnoresCycle];
 
-    // 配置透明 WebKit 视图与 JS 退出通道
+    // 配置透明 WebKit 视图与 JS 消息通道
     WKUserContentController *userContent = [[WKUserContentController alloc] init];
     [userContent addScriptMessageHandler:self name:@"capsuleApp"];
 
@@ -62,12 +61,22 @@
     [self.window orderFrontRegardless];
 }
 
-// 响应前端 JS 传递的关闭退出指令
+// 响应前端 JS 传递的退出与平滑拖拽移动指令
 - (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message {
     if ([message.name isEqualToString:@"capsuleApp"]) {
         NSDictionary *body = (NSDictionary *)message.body;
-        if ([body[@"action"] isEqualToString:@"quit"]) {
+        NSString *action = body[@"action"];
+
+        if ([action isEqualToString:@"quit"]) {
             [NSApp terminate:nil];
+        } else if ([action isEqualToString:@"move"]) {
+            // 实时更新窗口绝对坐标
+            CGFloat dx = [body[@"dx"] doubleValue];
+            CGFloat dy = [body[@"dy"] doubleValue]; // dy 已在 JS 中根据 macOS 坐标系校准
+            NSPoint origin = self.window.frame.origin;
+            origin.x += dx;
+            origin.y += dy;
+            [self.window setFrameOrigin:origin];
         }
     }
 }
