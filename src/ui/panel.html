@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Antigravity Context Meter</title>
+  <link rel="stylesheet" href="panel.css">
+</head>
+<body>
+  <div class="ag-card" id="ag-panel">
+    <!-- 头部：标题与识别的模型 -->
+    <div class="ag-header">
+      <div class="ag-title-row">
+        <span class="ag-title">Context Usage</span>
+        <span class="ag-model-badge" id="model-badge">Gemini Flash (1M)</span>
+      </div>
+      <span class="ag-turn-badge" id="turn-badge">0 轮对话</span>
+    </div>
+
+    <!-- 核心统计大字 -->
+    <div class="ag-stat-row">
+      <div class="ag-percent-big" id="percent-container">
+        <span id="percent-val" class="health-optimal">0.0</span>
+        <span class="ag-percent-unit">% Full</span>
+      </div>
+      <div class="ag-token-count">
+        <strong id="used-tokens" style="color: #fff;">0</strong>
+        <span class="ag-token-max">/ <span id="max-tokens">1M</span> Tokens</span>
+      </div>
+    </div>
+
+    <!-- 多色分段进度条 -->
+    <div class="ag-progress-track">
+      <div class="ag-seg seg-rules" id="seg-rules" style="width: 0%" title="System & Rules"></div>
+      <div class="ag-seg seg-mcp" id="seg-mcp" style="width: 0%" title="Skills & MCP Tools"></div>
+      <div class="ag-seg seg-messages" id="seg-messages" style="width: 0%" title="Chat Messages"></div>
+      <div class="ag-seg seg-outputs" id="seg-outputs" style="width: 0%" title="Tool Execution Outputs"></div>
+      <div class="ag-seg seg-meta" id="seg-meta" style="width: 0%" title="Metadata"></div>
+    </div>
+
+    <!-- 构成明细图例 -->
+    <div class="ag-legend-grid">
+      <div class="ag-legend-item">
+        <div class="ag-legend-left">
+          <span class="ag-dot" style="background: var(--seg-rules);"></span>
+          <span>System Rules</span>
+        </div>
+        <span class="ag-legend-val" id="val-rules">0</span>
+      </div>
+      <div class="ag-legend-item">
+        <div class="ag-legend-left">
+          <span class="ag-dot" style="background: var(--seg-mcp);"></span>
+          <span>Skills & MCP</span>
+        </div>
+        <span class="ag-legend-val" id="val-mcp">0</span>
+      </div>
+      <div class="ag-legend-item">
+        <div class="ag-legend-left">
+          <span class="ag-dot" style="background: var(--seg-messages);"></span>
+          <span>Messages</span>
+        </div>
+        <span class="ag-legend-val" id="val-messages">0</span>
+      </div>
+      <div class="ag-legend-item">
+        <div class="ag-legend-left">
+          <span class="ag-dot" style="background: var(--seg-outputs);"></span>
+          <span>Tool Outputs</span>
+        </div>
+        <span class="ag-legend-val" id="val-outputs">0</span>
+      </div>
+    </div>
+
+    <div class="ag-section-divider"></div>
+
+    <!-- Top 消耗溯源 -->
+    <div class="ag-section-title">
+      <span>🔥 Top 消耗溯源 (Top Consumers)</span>
+      <span style="font-size: 10px; color: var(--text-muted);">按占用排序</span>
+    </div>
+
+    <div class="ag-top-list" id="top-consumers-list">
+      <div class="ag-top-item" style="color: var(--text-muted); justify-content: center;">
+        正在分析当前会话操作...
+      </div>
+    </div>
+
+    <!-- 底部一键提炼迁移操作 -->
+    <button class="ag-action-btn" id="btn-migrate">
+      <span>⚡</span>
+      <span>一键提炼新会话 Prompt (0 遗忘迁移)</span>
+    </button>
+  </div>
+
+  <div class="ag-toast" id="ag-toast">已复制结构化迁移 Prompt 到剪贴板！</div>
+
+  <script src="panel.js"></script>
+</body>
+</html>

@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Antigravity Capsule</title>
+  <style>
+    :root {
+      --bg-capsule: rgba(22, 24, 29, 0.92);
+      --bg-panel: rgba(18, 20, 24, 0.96);
+      --border: rgba(255, 255, 255, 0.14);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --green: #10b981;
+      --yellow: #f59e0b;
+      --orange: #f97316;
+      --red: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+      background: transparent;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      padding: 8px;
+      width: 100%;
+      -webkit-app-region: drag; /* 按住背景可自由拖拽 */
+    }
+
+    /* 常态极简胶囊 (Mini Capsule) */
+    .capsule-pill {
+      background: var(--bg-capsule);
+      backdrop-filter: blur(24px) saturate(190%);
+      -webkit-backdrop-filter: blur(24px) saturate(190%);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+      padding: 6px 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      -webkit-app-region: no-drag;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .capsule-pill:hover {
+      background: rgba(30, 34, 42, 0.98);
+      border-color: rgba(255, 255, 255, 0.35);
+      transform: scale(1.02);
+    }
+
+    .pill-ring {
+      width: 14px;
+      height: 14px;
+      transform: rotate(-90deg);
+    }
+
+    .pill-ring-bg {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.15);
+      stroke-width: 2.8;
+    }
+
+    .pill-ring-fill {
+      fill: none;
+      stroke-width: 2.8;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.4s ease, stroke 0.3s ease;
+    }
+
+    .pill-percent {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+      color: var(--text-main);
+      font-feature-settings: 'tnum';
+    }
+
+    .pill-tokens {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-feature-settings: 'tnum';
+    }
+
+    .pill-tag {
+      font-size: 9px;
+      padding: 1px 5px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+    }
+
+    /* 展开的详情面板 (Expanded Detail Card) */
+    .detail-card {
+      display: none;
+      margin-top: 8px;
+      background: var(--bg-panel);
+      backdrop-filter: blur(28px) saturate(200%);
+      -webkit-backdrop-filter: blur(28px) saturate(200%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+      padding: 14px 16px;
+      width: 350px;
+      max-width: 350px;
+      box-sizing: border-box;
+      -webkit-app-region: no-drag;
+      animation: expand-anim 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .detail-card.open {
+      display: block;
+    }
+
+    @keyframes expand-anim {
+      from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* 顶部操作条（解决 flex 溢出问题） */
+    .top-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      width: 100%;
+    }
+
+    .select-wrapper {
+      flex: 1;
+      min-width: 0; /* 关键：解决 flex item 文本过长导致右侧被顶出屏幕 */
+      position: relative;
+    }
+
+    .session-select {
+      width: 100%;
+      min-width: 0;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      color: var(--text-main);
+      font-size: 11px;
+      font-weight: 500;
+      padding: 6px 24px 6px 8px;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='14' viewBox='0 0 24 24' width='14' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 6px center;
+    }
+
+    .session-select option {
+      background: #181b21;
+      color: #fff;
+    }
+
+    /* 醒目的 macOS 红色关闭圆钮 */
+    .btn-red-quit {
+      flex-shrink: 0; /* 绝对禁止被压缩或挤出 */
+      width: 22px;
+      height: 22px;
+      min-width: 22px;
+      border-radius: 50%;
+      background: #ef4444;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.5);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .btn-red-quit:hover {
+      background: #dc2626;
+      transform: scale(1.15);
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.9);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      max-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-model {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 8px;
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .card-track {
+      height: 7px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      margin: 8px 0;
+    }
+
+    .seg { height: 100%; transition: width 0.4s ease; }
+    .seg-rules { background: #a855f7; }
+    .seg-mcp { background: #3b82f6; }
+    .seg-msg { background: #10b981; }
+    .seg-out { background: #f59e0b; }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px 12px;
+      font-size: 11px;
+      margin-bottom: 10px;
+    }
+
+    .grid-item {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-muted);
+    }
+
+    .grid-val {
+      color: var(--text-main);
+      font-weight: 600;
+      font-feature-settings: 'tnum';
+    }
+
+    .top-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .top-item-row {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 10px;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .top-item-name {
+      color: var(--text-main);
+      max-width: 220px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .top-item-val {
+      color: var(--yellow);
+      font-weight: 600;
+    }
+
+    .btn-copy {
+      width: 100%;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(168, 85, 247, 0.2));
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      color: #e0e7ff;
+      border-radius: 8px;
+      padding: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-copy:hover {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.35), rgba(168, 85, 247, 0.35));
+    }
+
+    /* 健康度颜色 */
+    .health-optimal { stroke: var(--green); color: var(--green); }
+    .health-moderate { stroke: var(--yellow); color: var(--yellow); }
+    .health-warning { stroke: var(--orange); color: var(--orange); }
+    .health-critical { stroke: var(--red); color: var(--red); }
+  </style>
+</head>
+<body>
+  <!-- 极简胶囊 -->
+  <div class="capsule-pill" id="pill-btn" title="点击展开/收起用量卡片">
+    <svg class="pill-ring" viewBox="0 0 36 36">
+      <path class="pill-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+      <path class="pill-ring-fill health-optimal" id="ring-fill" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+    </svg>
+    <span class="pill-percent" id="pill-pct">0.0%</span>
+    <span class="pill-tokens" id="pill-tok">~0K</span>
+    <span class="pill-tag" id="pill-source">桌面端</span>
+  </div>
+
+  <!-- 展开的详情面板 -->
+  <div class="detail-card" id="detail-card">
+    <!-- 顶部操作条：下拉菜单 + 醒目红色圆叉关闭按钮 -->
+    <div class="top-bar-row">
+      <div class="select-wrapper">
+        <select class="session-select" id="session-select">
+          <option value="auto">⚡ 自动跟随最新活动项目</option>
+        </select>
+      </div>
+      <div class="btn-red-quit" id="btn-quit" title="退出关闭悬浮窗">✕</div>
+    </div>
+
+    <div class="card-header">
+      <span class="card-title" id="card-title">当前项目</span>
+      <span class="card-model" id="card-model">Gemini Flash</span>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+      <span style="font-size: 20px; font-weight: 700;" id="card-pct" class="health-optimal">0.0%</span>
+      <span style="font-size: 11px; color: var(--text-muted);"><strong id="card-used" style="color: #fff;">0</strong> / <span id="card-max">1M</span></span>
+    </div>
+
+    <!-- 分段条 -->
+    <div class="card-track">
+      <div class="seg seg-rules" id="seg-rules" style="width: 0%"></div>
+      <div class="seg seg-mcp" id="seg-mcp" style="width: 0%"></div>
+      <div class="seg seg-msg" id="seg-msg" style="width: 0%"></div>
+      <div class="seg seg-out" id="seg-out" style="width: 0%"></div>
+    </div>
+
+    <!-- 图例 -->
+    <div class="card-grid">
+      <div class="grid-item"><span>🟣 Rules</span><span class="grid-val" id="g-rules">0</span></div>
+      <div class="grid-item"><span>🔵 MCP</span><span class="grid-val" id="g-mcp">0</span></div>
+      <div class="grid-item"><span>🟢 Messages</span><span class="grid-val" id="g-msg">0</span></div>
+      <div class="grid-item"><span>🟡 Outputs</span><span class="grid-val" id="g-out">0</span></div>
+    </div>
+
+    <!-- Top 消耗 -->
+    <div class="top-section-title">🔥 Top 消耗溯源</div>
+    <div id="top-box"></div>
+
+    <button class="btn-copy" id="btn-copy">⚡ 一键提炼新会话 Prompt</button>
+  </div>
+
+  <script>
+    let currentSnap = null;
+    let isOpen = false;
+    let selectedConvId = 'auto';
+
+    const pillBtn = document.getElementById('pill-btn');
+    const detailCard = document.getElementById('detail-card');
+    const sessionSelect = document.getElementById('session-select');
+    const btnQuit = document.getElementById('btn-quit');
+
+    pillBtn.addEventListener('click', () => {
+      isOpen = !isOpen;
+      detailCard.classList.toggle('open', isOpen);
+    });
+
+    // 红色圆圈关闭按钮
+    btnQuit.addEventListener('click', (e) => {
+      e.stopPropagation();
+      fetch('/api/quit').catch(() => {});
+      if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.capsuleApp) {
+        window.webkit.messageHandlers.capsuleApp.postMessage({ action: 'quit' });
+      }
+      setTimeout(() => { window.close(); }, 100);
+    });
+
+    sessionSelect.addEventListener('change', (e) => {
+      const val = e.target.value;
+      selectedConvId = val;
+      fetch(`/api/select?id=${val}`);
+    });
+
+    function formatK(n) {
+      if (!n) return '0';
+      if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+      if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+      return n.toString();
+    }
+
+    function updateSessionOptions(convs, activeId) {
+      if (!convs || convs.length === 0) return;
+      
+      let html = '<option value="auto">⚡ 自动跟随最新活动项目</option>';
+      for (const c of convs) {
+        const icon = c.source === 'desktop' ? '💻 [桌面端]' : '🛠️ [IDE端]';
+        const isSelected = selectedConvId === c.id ? 'selected' : '';
+        html += `<option value="${c.id}" ${isSelected}>${icon} ${c.title} (${c.lastUpdatedStr})</option>`;
+      }
+      sessionSelect.innerHTML = html;
+      sessionSelect.value = selectedConvId;
+    }
+
+    function render(snap) {
+      if (!snap) return;
+      currentSnap = snap;
+
+      // 胶囊更新
+      document.getElementById('pill-pct').innerText = snap.percentage.toFixed(1) + '%';
+      document.getElementById('pill-tok').innerText = `~${formatK(snap.usedTokens)}`;
+      document.getElementById('pill-source').innerText = snap.source === 'desktop' ? '桌面端' : 'IDE端';
+
+      const ring = document.getElementById('ring-fill');
+      ring.setAttribute('stroke-dasharray', `${snap.percentage}, 100`);
+      ring.className = `pill-ring-fill health-${snap.healthLevel}`;
+
+      // 面板更新
+      document.getElementById('card-title').innerText = snap.conversationTitle || '当前项目';
+      document.getElementById('card-model').innerText = snap.modelDisplayName || 'Gemini Flash';
+      const cardPct = document.getElementById('card-pct');
+      cardPct.innerText = snap.percentage.toFixed(1) + '%';
+      cardPct.className = `health-${snap.healthLevel}`;
+
+      document.getElementById('card-used').innerText = formatK(snap.usedTokens);
+      document.getElementById('card-max').innerText = formatK(snap.maxTokens);
+
+      const max = snap.maxTokens || 1000000;
+      const b = snap.breakdown || {};
+      document.getElementById('seg-rules').style.width = `${((b.systemRulesTokens || 0) / max) * 100}%`;
+      document.getElementById('seg-mcp').style.width = `${((b.skillsMcpTokens || 0) / max) * 100}%`;
+      document.getElementById('seg-msg').style.width = `${((b.messagesTokens || 0) / max) * 100}%`;
+      document.getElementById('seg-out').style.width = `${((b.toolOutputsTokens || 0) / max) * 100}%`;
+
+      document.getElementById('g-rules').innerText = formatK(b.systemRulesTokens);
+      document.getElementById('g-mcp').innerText = formatK(b.skillsMcpTokens);
+      document.getElementById('g-msg').innerText = formatK(b.messagesTokens);
+      document.getElementById('g-out').innerText = formatK(b.toolOutputsTokens);
+
+      // 下拉菜单更新
+      if (snap.availableConversations) {
+        updateSessionOptions(snap.availableConversations, snap.conversationId);
+      }
+
+      // Top 消耗
+      const topBox = document.getElementById('top-box');
+      if (!snap.topConsumers || snap.topConsumers.length === 0) {
+        topBox.innerHTML = '<div style="font-size:10px; color:var(--text-muted); text-align:center; padding:4px;">暂无大开销</div>';
+      } else {
+        topBox.innerHTML = snap.topConsumers.slice(0, 3).map((item, i) => `
+          <div class="top-item-row">
+            <span class="top-item-name">${i+1}. ${item.name}</span>
+            <span class="top-item-val">${formatK(item.tokens)} (${item.percentage}%)</span>
+          </div>
+        `).join('');
+      }
+    }
+
+    document.getElementById('btn-copy').addEventListener('click', () => {
+      if (currentSnap && currentSnap.migrationPrompt) {
+        navigator.clipboard.writeText(currentSnap.migrationPrompt).then(() => {
+          const btn = document.getElementById('btn-copy');
+          btn.innerText = '✅ 已复制迁移 Prompt 到剪贴板！';
+          setTimeout(() => { btn.innerText = '⚡ 一键提炼新会话 Prompt'; }, 2000);
+        });
+      }
+    });
+
+    // 建立 SSE 实时监听
+    function connectSSE() {
+      const source = new EventSource('/events');
+      source.onmessage = (e) => {
+        try {
+          const data = JSON.parse(e.data);
+          if (data.type === 'UPDATE_SNAPSHOT') {
+            render(data.payload);
+          }
+        } catch {}
+      };
+      source.onerror = () => {
+        setTimeout(connectSSE, 3000);
+      };
+    }
+    connectSSE();
+  </script>
+</body>
+</html>

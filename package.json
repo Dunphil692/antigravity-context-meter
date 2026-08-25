@@ -1,0 +1,43 @@
+{
+  "name": "antigravity-context-meter",
+  "displayName": "Antigravity Context Meter",
+  "description": "Cursor-style real-time context token usage meter, breakdown & summarizer for Antigravity.",
+  "version": "1.0.0",
+  "publisher": "antigravity-community",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "antigravity-context-meter.openPanel",
+        "title": "Antigravity: Open Context Usage Meter"
+      }
+    ]
+  },
+  "categories": [
+    "Other",
+    "Programming Languages",
+    "Formatters"
+  ],
+  "scripts": {
+    "build": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "bundle": "node esbuild.config.js",
+    "package": "vsce package --allow-missing-repository --no-dependencies",
+    "test:core": "node out/test-runner.js",
+    "start:desktop": "node dist/desktop.js",
+    "start:capsule": "bash ./start-capsule.sh",
+    "build:capsule": "clang -fobjc-arc -O2 src/desktop/macos/main.m -o dist/AntigravityCapsule -framework Cocoa -framework WebKit"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.20.0",
+    "typescript": "^5.3.3"
+  }
+}
