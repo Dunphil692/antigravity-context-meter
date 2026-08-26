@@ -3,7 +3,7 @@
 # 💊 Antigravity Context Meter
 
 <p align="center">
-  <b>1:1 Cursor-grade Real-time Context Usage Meter & Zero-Loss Session Migration for Google Antigravity</b><br/>
+  <b>1:1 Minimalist Real-time Context Usage Meter & Zero-Loss Session Migration for Google Antigravity</b><br/>
   <i>High-precision local token tracking, HUD floating capsule, and smart continuity extraction.</i>
 </p>
 
@@ -32,7 +32,12 @@
 
 <br/>
 
-<!-- Hero Image Showcase -->
+<!-- Hero Banner -->
+<p align="center">
+  <img src="assets/hero-banner.jpg" alt="Antigravity Context Meter Showcase" width="100%" style="border-radius: 12px; box-shadow: 0 16px 36px rgba(0,0,0,0.6);" />
+</p>
+
+<!-- Real-World UI Showcase -->
 <p align="center">
   <img src="assets/preview-capsule.png" alt="Mini Capsule" width="280" />
   <br/><br/>
@@ -45,19 +50,19 @@
 
 ## 💡 Why Antigravity Context Meter?
 
-When using **Google Antigravity** or other autonomous coding agents for multi-turn tasks, developers frequently face these challenges:
+When using **Google Antigravity** for multi-turn autonomous coding tasks, developers frequently face these challenges:
 
 1. **Context Window Blindspot**: You never know when the token limit is reached until the agent begins **hallucinating, forgetting earlier architecture decisions, or degrading**.
 2. **Checking Usage Wastes Tokens**: Asking the agent `/context` in chat consumes valuable tokens and pollutes the conversation history.
 3. **Hard Context Transitions**: When reaching 80%~90% capacity, manually summarizing everything to start a fresh chat is slow and prone to missing key decisions.
 
-**Antigravity Context Meter** brings the iconic **Cursor-grade aesthetic** to Antigravity, featuring **zero-token local monitoring and 1-click zero-loss session migration**.
+**Antigravity Context Meter** solves this completely, featuring **zero-token local monitoring and 1-click zero-loss session migration**.
 
 ---
 
 ## ✨ Key Features
 
-### 🎨 1. 1:1 Cursor-grade Dark Frosted Glass UI
+### 🎨 1. Minimalist Dark Frosted Glass UI
 - **Dynamic Ring Meter**: Real-time percentage display with 4-level health alerts (Optimal / Moderate / Warning / Critical).
 - **4-Color Breakdown Bar**: Clear visual breakdown for **Rules (System)**, **MCP (Tools)**, **Messages (Chat)**, and **Outputs (Tool dumps)**.
 - **Native macOS Immersion**: Smooth `backdrop-filter: blur(28px)` dark HUD with native hardware rendering.
@@ -135,7 +140,7 @@ Stress-tested on M-series Mac with 100-turn chat history (200,000+ characters of
 
 ## 🗺️ Roadmap
 
-- [x] 1:1 Cursor-grade dark frosted glass UI & 4-color breakdown bar
+- [x] Minimalist dark frosted glass UI & 4-color breakdown bar
 - [x] Multi-project and multi-session dropdown switcher with pinning
 - [x] Native macOS floating HUD capsule with smooth screen dragging
 - [x] 1-Click zero-loss structured prompt distillation
@@ -162,5 +167,5 @@ Contributions are warmly welcomed! Whether you want to file an issue, suggest im
 This project is licensed under the [MIT License](LICENSE).
 
 <div align="center">
-  <sub>Made with ❤️ for the Antigravity & Agentic AI Community</sub>
+  <sub>Made with ❤️ for the Antigravity Community</sub>
 </div>

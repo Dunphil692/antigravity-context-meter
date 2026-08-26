@@ -1,10 +1,10 @@
 <div align="center">
 
-# 💊 Antigravity Context Meter
+# 💊 Antigravity Context Meter (上下文用量计量器)
 
 <p align="center">
-  <b>1:1 Cursor 级极简实时上下文计量器与 0 遗忘智能迁移工具</b><br/>
-  <i>Real-time Context Usage Meter & Zero-Loss Session Migration for Google Antigravity (Desktop & IDE)</i>
+  <b>1:1 极简沉浸式 Antigravity 实时上下文用量监控与 0 遗忘会话迁移工具</b><br/>
+  <i>高精度静默本地分词，全局常驻置顶悬浮小胶囊，智能防失忆 Prompt 一键提取。</i>
 </p>
 
 <p align="center">
@@ -15,153 +15,119 @@
 <p align="center">
   <a href="https://github.com/Dunphil692/antigravity-context-meter/releases/latest"><img src="https://img.shields.io/badge/Release-v1.0.0-emerald.svg?style=flat-square" alt="Version" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square" alt="License" /></a>
-  <img src="https://img.shields.io/badge/Platform-macOS%20%7C%20IDE%20%7C%20VS%20Code-purple.svg?style=flat-square" alt="Platform" />
-  <img src="https://img.shields.io/badge/Speed-0.039ms%20%2F%200%20Token-orange.svg?style=flat-square" alt="Speed" />
+  <img src="https://img.shields.io/badge/平台-macOS%20%7C%20IDE%20%7C%20VS%20Code-purple.svg?style=flat-square" alt="Platform" />
+  <img src="https://img.shields.io/badge/速度-0.039ms%20%2F%200%20Token-orange.svg?style=flat-square" alt="Speed" />
   <a href="https://github.com/Dunphil692/antigravity-context-meter/stargazers"><img src="https://img.shields.io/github/stars/Dunphil692/antigravity-context-meter?style=flat-square&color=yellow" alt="Stars" /></a>
-  <a href="https://github.com/Dunphil692/antigravity-context-meter/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome" /></a>
-</p>
-
-<p align="center">
-  <a href="#-核心特性-key-features">核心特性</a> •
-  <a href="#-实机效果展示-showcase">实机展示</a> •
-  <a href="#-极速安装使用-quick-start">极速上手</a> •
-  <a href="#-为什么需要它-the-problem">设计初衷</a> •
-  <a href="#-性能基准-benchmark">性能基准</a> •
-  <a href="#-参与贡献-contributing">参与贡献</a>
 </p>
 
 <br/>
 
-<!-- Hero Image Showcase -->
+<!-- Hero Banner -->
 <p align="center">
-  <img src="assets/preview-capsule.png" alt="Mini Capsule" width="280" />
+  <img src="assets/hero-banner.jpg" alt="Antigravity Context Meter Showcase" width="100%" style="border-radius: 12px; box-shadow: 0 16px 36px rgba(0,0,0,0.6);" />
+</p>
+
+<!-- 实机运行效果图 -->
+<p align="center">
+  <img src="assets/preview-capsule.png" alt="常态极简胶囊" width="280" />
   <br/><br/>
-  <img src="assets/preview-card.png" alt="Context Meter Panel" width="420" />
+  <img src="assets/preview-card.png" alt="展开详细卡片" width="420" />
 </p>
 
 </div>
 
 ---
 
-## 💡 为什么需要它？(The Problem We Solve)
+## 💡 解决的核心痛点
 
-在使用 **Google Antigravity** 或各类自主 Agentic AI 进行多轮复杂开发时，你是否遇到过以下痛点：
+在长时间使用 **Google Antigravity** 进行深度项目开发时，开发者通常面临三大困扰：
 
-1. **上下文黑盒**：不知道什么时候 Token 会满，直到模型开始**遗忘前置代码、逻辑退化、产生幻觉**才后知后觉。
-2. **查用量反倒费 Token**：在聊天框询问 `/context` 不仅占用对话轮次，还会**反向消耗大量模型 Token** 并污染代码上下文。
-3. **长会话难以平滑迁移**：当会话达到 80%~90% 上限不得不开新窗口时，手动总结前置进度极其费时，经常遗漏关键决策。
+1. **上下文超限盲区**：不知道当前会话还能聊多久，直到智能体开始**胡言乱语、遗忘之前的架构决策或回答被截断**；
+2. **查用量反向浪费 Token**：在对话框里输入 `/context` 询问用量，反而在占用宝贵的模型 Token 配额；
+3. **跨会话迁移困难**：对话满了要开新会话时，手动整理上下文繁琐耗时，极易遗漏关键技术上下文。
 
-**Antigravity Context Meter** 彻底解决了这一切 —— 采用与 Cursor 1:1 对齐的极简美学，提供**纯本地 0 Token 消耗的实时监控与一键 0 遗忘迁移**。
+**Antigravity Context Meter** 采用 **0 Token 本地静默事件流引擎**，彻底解决了上述问题。
 
 ---
 
-## ✨ 核心特性 (Key Features)
+## ✨ 核心特性
 
-### 🎨 1. 1:1 Cursor 级深色毛玻璃美学
-- **动态环形进度**：实时呈现用量百分比与绿/黄/橙/红四级健康度状态。
-- **四色分段发光条**：清晰拆解 **Rules (系统规则)**、**MCP (工具定义)**、**Messages (用户对话)** 与 **Outputs (工具大输出)**。
-- **macOS 原生沉浸感**：`backdrop-filter: blur(28px)` 深色毛玻璃 HUD，细节丝滑。
+### 🎨 1. 极简深色磨砂玻璃 UI
+- **环形进度仪表**：实时显示百分比与四级健康度告警（健康/轻度消耗/警告/危急）。
+- **四色分段条**：清晰区分 **System Rules (系统规则)**、**MCP (工具定义)**、**Messages (聊天记录)** 与 **Outputs (工具大输出)**。
+- **macOS 原生硬件加速**：支持物理级硬件渲染与深色毛玻璃模糊。
 
-### ⚡ 2. 纯本地静默监听 (0 Token 消耗 & 0.039ms 极速)
-- 完全通过本地事件驱动日志流（Event-driven IO）静默计算。
-- **不调用任何外部 API、不发送任何 Prompt、不消耗任何额外 Token**。
-- 自研混合分词引擎单次计算耗时仅 **0.039 毫秒**，CPU 占用日常为 **0.0%**。
+### ⚡ 2. 0 Token 本地静默追踪 (0.039ms 极速引擎)
+- 基于本地事件流监听机制（`fs.watch` + SSE），直接分析本地运行日志。
+- **不调用任何模型 API，不向智能体发任何消息，0 消耗 Token**。
+- 单次全量分词与统计耗时仅 **0.039 毫秒**，空闲 CPU 占用 **0.0%**。
 
-### 🗂️ 3. 多项目/多会话独立自由切换与锁定
-- 无论你在桌面端开着几个项目，还是在 IDE 端并发协作，下拉菜单自动罗列所有活动项目。
-- 支持**一键锁定监控特定项目**，或开启**⚡ 自动跟随最新活动项目**。
+### 🗂️ 3. 多项目 / 会话自由切换与锁定
+- 自动扫描 Antigravity 桌面端与 IDE 端的所有历史和活跃项目。
+- 在顶部下拉菜单中一键锁定任意特定会话，或选择 **⚡ 自动跟随最新活动项目**。
 
 <p align="center">
-  <img src="assets/preview-sessions.png" alt="Multi Session Selector" width="460" />
+  <img src="assets/preview-sessions.png" alt="多会话下拉切换" width="460" />
 </p>
 
-### 🔥 4. Top 5 大开销操作精准溯源
-- 毫秒级抓取会话中占用 Token 最多的 5 次操作（如哪一次 `run_command` 输出了超长日志、哪一篇文件读取过大），一目了然。
+### 🔥 4. Top 5 大开销溯源
+- 自动提取消耗 Token 最大的单次文件读写、工具调用或长回复，毫秒级揪出“用量刺客”。
 
-### 🚀 5. 一键 0 遗忘提炼迁移 Prompt (Zero-Loss Migration)
-- 在上下文接近饱和（75%~85%）时，点击 **`⚡ 一键提炼新会话 Prompt`**；
-- 智能提炼已完成成果、关键决策与未完成任务，在新窗口粘贴即可实现**100% 记忆接续**！
+### 🚀 5. 一键 0 遗忘迁移 Prompt 提炼
+- 当用量到达 80% 警戒线时，点击 **`⚡ 一键提炼新会话 Prompt`**；
+- 算法自动将当前项目的已完成工作、技术选型与未完成任务一键生成精炼的续接 Prompt，无缝开启新会话。
 
 ---
 
-## 🖥️ 双模独立形态 (Dual-Mode Architecture)
+## 🖥️ 双模形态
 
-本项目支持两种独立形态，按需选用：
-
-| 形态 | 适用场景 | 技术栈 | 体积 / 内存占用 |
+| 形态 | 适用场景 | 技术栈 | 占用体积 |
 | :--- | :--- | :--- | :--- |
-| **💊 独立桌面悬浮小胶囊 (Desktop Capsule)** | 适用于独立 Antigravity 客户端、全屏写代码时常驻监控 | macOS 原生 Cocoa + WebKit | **仅 53 KB** / ~15MB RAM |
-| **🛠️ IDE 原生状态栏插件 (IDE Extension)** | 适用于 Antigravity IDE / VS Code 内嵌开发 | VS Code Extension API | **仅 68 KB** (.vsix) |
+| **💊 独立桌面悬浮小胶囊** | 全屏开发、多显示器、跨 IDE 监控 | Objective-C Cocoa + WebKit | **仅 53 KB** (原生二进制) |
+| **🛠️ IDE 状态栏插件** | 专注编辑器内部开发流程 | VS Code Extension API | **仅 68 KB** (.vsix 安装包) |
 
 ---
 
-## 🚀 极速安装与使用 (Quick Start)
+## 🚀 极速上手
 
-### 选项 A：使用独立桌面悬浮小胶囊 (macOS)
+### 方式一：启动独立桌面悬浮小胶囊 (macOS)
 
 ```bash
 # 1. 克隆本仓库
 git clone https://github.com/Dunphil692/antigravity-context-meter.git
 cd antigravity-context-meter
 
-# 2. 一键启动悬浮小胶囊（后台常驻，屏幕右上角显示）
+# 2. 启动常驻悬浮小胶囊 (在屏幕右上角显示)
 ./start-capsule.sh
 
-# 3. 如需关闭，运行:
+# 3. 如需关闭悬浮窗 (或直接点击卡片上的红叉):
 ./stop-capsule.sh
-# （或者直接在展开的卡片右上角点击红色的 [✕] 按钮退出）
 ```
 
-### 选项 B：在 Antigravity IDE / VS Code 中安装插件
+### 方式二：在 Antigravity IDE / VS Code 中安装插件
 
 1. 前往 [Releases 页面](https://github.com/Dunphil692/antigravity-context-meter/releases/latest) 下载 `antigravity-context-meter-1.0.0.vsix`；
-2. 打开 Antigravity IDE / VS Code，进入插件面板 (`Cmd+Shift+X`)；
-3. 点击右上角菜单 `...` -> 选择 **`Install from VSIX...`**；
-4. 状态栏右下角即可看到实时用量小圆标！
+2. 在 IDE 中按下 `Cmd+Shift+X` 打开扩展面板；
+3. 点击右上角 `...` 菜单 -> 选择 **`从 VSIX 安装...`** (Install from VSIX)；
+4. 底部状态栏即可实时看到环形进度与 Token 实时用量。
 
 ---
 
-## 📊 性能基准测试 (Benchmark)
+## 📊 性能压测对比
 
-在 M-series Mac 上对 100 轮超长对话、20 万字符的真实工程日志进行压测：
-
-| 评估指标 | Antigravity Context Meter | 传统向 AI 问答 (/context) | 优势 |
+| 指标 | Antigravity Context Meter | 聊天输入 `/context` | 优势对比 |
 | :--- | :---: | :---: | :---: |
-| **API Token 消耗** | **0 Token** | 每次消耗 1,000 ~ 5,000 Tokens | 🟢 **100% 零成本** |
-| **响应耗时** | **0.039 ms** | 1.5 s ~ 3.0 s | 🟢 **快 50,000 倍** |
-| **应用体积** | **53 KB** (原生) | - | 🟢 **极致轻量** |
-| **日常 CPU 占用** | **0.0% ~ 0.1%** | - | 🟢 **无感省电** |
+| **API Token 消耗** | **0 Token** | 每次消耗 1,000 ~ 5,000 Token | 🟢 **100% 零成本** |
+| **刷新延迟** | **0.039 ms** | 1.5 秒 ~ 3.0 秒 | 🟢 **快 50,000 倍** |
+| **程序体积** | **53 KB** (原生无依赖) | - | 🟢 **极致轻量** |
+| **CPU 占用** | **0.0% ~ 0.1%** | - | 🟢 **零电池损耗** |
 
 ---
 
-## 🗺️ 路线图 (Roadmap)
+## 📄 开源许可证
 
-- [x] 1:1 Cursor 级深色毛玻璃 UI 与多色分段条
-- [x] 多项目与多会话下拉切换与独立锁定
-- [x] macOS 原生置顶透明悬浮小胶囊 (Cocoa HUD)
-- [x] 75%~85% 上下文一键 0 遗忘迁移 Prompt 生成
-- [ ] 支持 Windows / Linux 悬浮窗适配
-- [ ] 支持用户自定义告警阈值（如 60%/80% 触发桌面通知）
-- [ ] 官方 Antigravity 插件中心一键分发支持
-
----
-
-## 🤝 参与贡献 (Contributing)
-
-我们非常欢迎社区 Contributors 加入！无论是提出 Issue、优化 UI 动效、还是适配新平台：
-
-1. **Fork** 本项目
-2. 创建你的特性分支 (`git checkout -b feature/CoolFeature`)
-3. 提交你的代码 (`git commit -m 'feat: Add CoolFeature'`)
-4. 推送到分支 (`git push origin feature/CoolFeature`)
-5. 开启一个 **Pull Request**
-
----
-
-## 📄 开源协议 (License)
-
-本项目基于 [MIT License](LICENSE) 开源。欢迎自由使用、学习与修改！
+本项目基于 [MIT License](LICENSE) 开源。
 
 <div align="center">
-  <sub>Made with ❤️ for the Antigravity & Agentic AI Community</sub>
+  <sub>Made with ❤️ for the Antigravity Community</sub>
 </div>
