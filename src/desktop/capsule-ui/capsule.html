@@ -6,9 +6,9 @@
   <title>Antigravity Capsule</title>
   <style>
     :root {
-      --bg-capsule: rgba(22, 24, 29, 0.92);
-      --bg-panel: rgba(18, 20, 24, 0.96);
-      --border: rgba(255, 255, 255, 0.14);
+      --bg-capsule: rgba(22, 24, 29, 0.94);
+      --bg-panel: rgba(18, 20, 24, 0.98);
+      --border: rgba(255, 255, 255, 0.16);
       --text-main: #f3f4f6;
       --text-muted: #9ca3af;
       --green: #10b981;
@@ -32,18 +32,19 @@
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      padding: 8px;
-      width: 100%;
+      padding: 4px;
+      width: 100vw;
+      height: 100vh;
     }
 
-    /* 常态极简胶囊 (Mini Capsule) - 支持鼠标任意拖拽移动 */
+    /* 常态极简胶囊 (Mini Capsule) */
     .capsule-pill {
       background: var(--bg-capsule);
       backdrop-filter: blur(24px) saturate(190%);
       -webkit-backdrop-filter: blur(24px) saturate(190%);
       border: 1px solid var(--border);
       border-radius: 20px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
       padding: 6px 12px;
       display: inline-flex;
       align-items: center;
@@ -54,12 +55,11 @@
 
     .capsule-pill:hover {
       background: rgba(30, 34, 42, 0.98);
-      border-color: rgba(255, 255, 255, 0.35);
+      border-color: rgba(255, 255, 255, 0.4);
     }
 
     .capsule-pill:active {
       cursor: grabbing;
-      transform: scale(0.98);
     }
 
     .pill-ring {
@@ -106,18 +106,18 @@
     /* 展开的详情面板 (Expanded Detail Card) */
     .detail-card {
       display: none;
-      margin-top: 8px;
+      margin-top: 6px;
       background: var(--bg-panel);
-      backdrop-filter: blur(28px) saturate(200%);
-      -webkit-backdrop-filter: blur(28px) saturate(200%);
+      backdrop-filter: blur(32px) saturate(200%);
+      -webkit-backdrop-filter: blur(32px) saturate(200%);
       border: 1px solid var(--border);
       border-radius: 16px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
       padding: 14px 16px;
       width: 350px;
       max-width: 350px;
       box-sizing: border-box;
-      animation: expand-anim 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: expand-anim 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .detail-card.open {
@@ -125,7 +125,7 @@
     }
 
     @keyframes expand-anim {
-      from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+      from { opacity: 0; transform: translateY(-6px) scale(0.98); }
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
@@ -202,6 +202,7 @@
       align-items: center;
       margin-bottom: 8px;
       cursor: grab;
+      padding: 2px 0;
     }
 
     .card-header:active {
@@ -321,7 +322,7 @@
 </head>
 <body>
   <!-- 极简胶囊 -->
-  <div class="capsule-pill" id="pill-btn" title="点击展开面板，按住可任意拖拽位置">
+  <div class="capsule-pill" id="pill-btn" title="点击展开/收起，按住任意拖动位置">
     <svg class="pill-ring" viewBox="0 0 36 36">
       <path class="pill-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
       <path class="pill-ring-fill health-optimal" id="ring-fill" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
@@ -387,55 +388,27 @@
     const btnQuit = document.getElementById('btn-quit');
     const cardDragBar = document.getElementById('card-drag-bar');
 
-    // === 全局丝滑拖拽系统 (Smooth Drag System) ===
-    let isDragging = false;
-    let hasMoved = false;
-    let dragDist = 0;
-    let lastScreenX = 0;
-    let lastScreenY = 0;
-
-    function initDrag(targetElem, isClickable) {
-      targetElem.addEventListener('mousedown', (e) => {
-        if (e.button !== 0) return; // 仅限左键
-        isDragging = true;
-        hasMoved = false;
-        dragDist = 0;
-        lastScreenX = e.screenX;
-        lastScreenY = e.screenY;
+    // 绑定原生 Cocoa 全局拖拽
+    function bindNativeDrag(elem) {
+      elem.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.capsuleApp) {
+          window.webkit.messageHandlers.capsuleApp.postMessage({ action: 'startDrag' });
+        }
       });
     }
 
-    initDrag(pillBtn, true);
-    initDrag(cardDragBar, false);
+    bindNativeDrag(pillBtn);
+    bindNativeDrag(cardDragBar);
 
-    window.addEventListener('mousemove', (e) => {
-      if (!isDragging) return;
-      const dx = e.screenX - lastScreenX;
-      const dy = e.screenY - lastScreenY;
-      lastScreenX = e.screenX;
-      lastScreenY = e.screenY;
-
-      dragDist += Math.abs(dx) + Math.abs(dy);
-      if (dragDist > 3) {
-        hasMoved = true;
-      }
-
-      // 发送坐标增量给 Cocoa 原生窗口 (macOS 坐标系 Y 轴向下为负，需翻转)
+    // 原生回调：当用户单纯点击未拖动时由 Cocoa 触发
+    window.toggleExpandFromNative = function() {
+      isOpen = !isOpen;
+      detailCard.classList.toggle('open', isOpen);
       if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.capsuleApp) {
-        window.webkit.messageHandlers.capsuleApp.postMessage({ action: 'move', dx: dx, dy: -dy });
+        window.webkit.messageHandlers.capsuleApp.postMessage({ action: 'setExpanded', expanded: isOpen });
       }
-    });
-
-    window.addEventListener('mouseup', () => {
-      if (isDragging) {
-        isDragging = false;
-        // 如果只是轻点（位移 < 4px），则执行展开/收起切换
-        if (!hasMoved) {
-          isOpen = !isOpen;
-          detailCard.classList.toggle('open', isOpen);
-        }
-      }
-    });
+    };
 
     // 红色圆圈关闭按钮
     btnQuit.addEventListener('click', (e) => {

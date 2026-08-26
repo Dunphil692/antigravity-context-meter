@@ -4,6 +4,7 @@
 @interface CapsuleAppDelegate : NSObject <NSApplicationDelegate, WKScriptMessageHandler>
 @property (strong, nonatomic) NSPanel *window;
 @property (strong, nonatomic) WKWebView *webView;
+@property (assign, nonatomic) BOOL isExpanded;
 @end
 
 @implementation CapsuleAppDelegate
@@ -12,24 +13,23 @@
     NSScreen *screen = [NSScreen mainScreen];
     NSRect screenRect = screen ? [screen visibleFrame] : NSMakeRect(0, 0, 1440, 900);
 
-    CGFloat width = 390;
-    CGFloat height = 400;
+    // 默认常态小胶囊尺寸：紧凑型 210 x 48，绝不遮挡外部多余空间
+    CGFloat width = 210;
+    CGFloat height = 48;
     CGFloat x = screenRect.origin.x + screenRect.size.width - width - 20;
     CGFloat y = screenRect.origin.y + screenRect.size.height - height - 30;
 
     NSRect frame = NSMakeRect(x, y, width, height);
+    self.isExpanded = NO;
 
-    // 创建无边框透明面板
+    // 创建无边框浮动面板
     self.window = [[NSPanel alloc] initWithContentRect:frame
                                              styleMask:NSWindowStyleMaskBorderless | NSWindowStyleMaskNonactivatingPanel
                                                backing:NSBackingStoreBuffered
                                                  defer:NO];
 
-    // 禁止失焦自动隐藏
     [self.window setHidesOnDeactivate:NO];
     [self.window setCanHide:NO];
-
-    // 全局置顶与跨空间常驻
     [self.window setLevel:NSFloatingWindowLevel];
     [self.window setOpaque:NO];
     [self.window setBackgroundColor:[NSColor clearColor]];
@@ -39,7 +39,7 @@
                                        NSWindowCollectionBehaviorStationary |
                                        NSWindowCollectionBehaviorIgnoresCycle];
 
-    // 配置透明 WebKit 视图与 JS 消息通道
+    // 配置透明 WebKit 视图与通信通道
     WKUserContentController *userContent = [[WKUserContentController alloc] init];
     [userContent addScriptMessageHandler:self name:@"capsuleApp"];
 
@@ -61,7 +61,61 @@
     [self.window orderFrontRegardless];
 }
 
-// 响应前端 JS 传递的退出与平滑拖拽移动指令
+// 动态调整窗口尺寸（展开 370x410 vs 收起 210x48），锚定右上角位置不变
+- (void)updateExpandedState:(BOOL)expanded {
+    self.isExpanded = expanded;
+    NSRect frame = self.window.frame;
+    CGFloat topY = frame.origin.y + frame.size.height;
+    CGFloat rightX = frame.origin.x + frame.size.width;
+
+    CGFloat newWidth = expanded ? 370 : 210;
+    CGFloat newHeight = expanded ? 410 : 48;
+
+    NSRect newFrame = NSMakeRect(rightX - newWidth, topY - newHeight, newWidth, newHeight);
+    [self.window setFrame:newFrame display:YES animate:NO];
+}
+
+// 原生 macOS 全局丝滑拖拽循环（彻底解决上下拉失灵问题）
+- (void)handleGlobalDrag {
+    NSWindow *win = self.window;
+    NSPoint initialMouse = [NSEvent mouseLocation];
+    NSRect initialFrame = win.frame;
+    BOOL hasMoved = NO;
+
+    while (YES) {
+        NSEvent *event = [NSApp nextEventMatchingMask:(NSEventMaskLeftMouseUp | NSEventMaskLeftMouseDragged)
+                                            untilDate:[NSDate distantFuture]
+                                               inMode:NSEventTrackingRunLoopMode
+                                              dequeue:YES];
+
+        if (!event) continue;
+
+        if (event.type == NSEventTypeLeftMouseDragged) {
+            NSPoint currentMouse = [NSEvent mouseLocation];
+            CGFloat deltaX = currentMouse.x - initialMouse.x;
+            CGFloat deltaY = currentMouse.y - initialMouse.y;
+
+            if (fabs(deltaX) > 2.0 || fabs(deltaY) > 2.0) {
+                hasMoved = YES;
+            }
+
+            NSRect newFrame = initialFrame;
+            newFrame.origin.x += deltaX;
+            newFrame.origin.y += deltaY;
+            [win setFrameOrigin:newFrame.origin];
+        } else if (event.type == NSEventTypeLeftMouseUp) {
+            // 如果没有发生有效拖拽位移，说明是单纯点击，触发展开/收起
+            if (!hasMoved) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self.webView evaluateJavaScript:@"window.toggleExpandFromNative()" completionHandler:nil];
+                });
+            }
+            break;
+        }
+    }
+}
+
+// 接收 JS 消息
 - (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message {
     if ([message.name isEqualToString:@"capsuleApp"]) {
         NSDictionary *body = (NSDictionary *)message.body;
@@ -69,14 +123,11 @@
 
         if ([action isEqualToString:@"quit"]) {
             [NSApp terminate:nil];
-        } else if ([action isEqualToString:@"move"]) {
-            // 实时更新窗口绝对坐标
-            CGFloat dx = [body[@"dx"] doubleValue];
-            CGFloat dy = [body[@"dy"] doubleValue]; // dy 已在 JS 中根据 macOS 坐标系校准
-            NSPoint origin = self.window.frame.origin;
-            origin.x += dx;
-            origin.y += dy;
-            [self.window setFrameOrigin:origin];
+        } else if ([action isEqualToString:@"startDrag"]) {
+            [self handleGlobalDrag];
+        } else if ([action isEqualToString:@"setExpanded"]) {
+            BOOL expanded = [body[@"expanded"] boolValue];
+            [self updateExpandedState:expanded];
         }
     }
 }
