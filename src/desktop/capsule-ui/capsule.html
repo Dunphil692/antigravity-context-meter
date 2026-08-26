@@ -32,25 +32,26 @@
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      padding: 4px;
+      padding: 2px;
       width: 100vw;
       height: 100vh;
     }
 
-    /* 常态极简胶囊 (Mini Capsule) */
+    /* 常态极简胶囊 (Mini Capsule) - 精确控制高度 32px，零空间浪费 */
     .capsule-pill {
       background: var(--bg-capsule);
       backdrop-filter: blur(24px) saturate(190%);
       -webkit-backdrop-filter: blur(24px) saturate(190%);
       border: 1px solid var(--border);
-      border-radius: 20px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
-      padding: 6px 12px;
+      border-radius: 18px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+      padding: 4px 10px;
+      height: 32px;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       cursor: grab;
-      transition: background 0.2s, border-color 0.2s, transform 0.15s;
+      transition: background 0.2s, border-color 0.2s;
     }
 
     .capsule-pill:hover {
@@ -63,8 +64,8 @@
     }
 
     .pill-ring {
-      width: 14px;
-      height: 14px;
+      width: 13px;
+      height: 13px;
       transform: rotate(-90deg);
     }
 
@@ -82,7 +83,7 @@
     }
 
     .pill-percent {
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 700;
       letter-spacing: -0.2px;
       color: var(--text-main);
@@ -90,7 +91,7 @@
     }
 
     .pill-tokens {
-      font-size: 11px;
+      font-size: 10.5px;
       color: var(--text-muted);
       font-feature-settings: 'tnum';
     }
@@ -98,7 +99,7 @@
     .pill-tag {
       font-size: 9px;
       padding: 1px 5px;
-      border-radius: 6px;
+      border-radius: 5px;
       background: rgba(255, 255, 255, 0.1);
       color: #cbd5e1;
     }
@@ -113,9 +114,9 @@
       border: 1px solid var(--border);
       border-radius: 16px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
-      padding: 14px 16px;
-      width: 350px;
-      max-width: 350px;
+      padding: 12px 14px;
+      width: 345px;
+      max-width: 345px;
       box-sizing: border-box;
       animation: expand-anim 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     }
@@ -133,8 +134,8 @@
     .top-bar-row {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 12px;
+      gap: 8px;
+      margin-bottom: 10px;
       width: 100%;
     }
 
@@ -153,7 +154,7 @@
       color: var(--text-main);
       font-size: 11px;
       font-weight: 500;
-      padding: 6px 24px 6px 8px;
+      padding: 5px 24px 5px 8px;
       outline: none;
       cursor: pointer;
       appearance: none;
@@ -174,26 +175,26 @@
     /* 醒目的 macOS 红色关闭圆钮 */
     .btn-red-quit {
       flex-shrink: 0;
-      width: 22px;
-      height: 22px;
-      min-width: 22px;
+      width: 20px;
+      height: 20px;
+      min-width: 20px;
       border-radius: 50%;
       background: #ef4444;
       color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 900;
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.5);
+      box-shadow: 0 2px 6px rgba(239, 68, 68, 0.5);
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .btn-red-quit:hover {
       background: #dc2626;
       transform: scale(1.15);
-      box-shadow: 0 0 12px rgba(239, 68, 68, 0.9);
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.9);
     }
 
     .card-header {
@@ -210,20 +211,20 @@
     }
 
     .card-title {
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 700;
       color: #fff;
-      max-width: 200px;
+      max-width: 190px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
     .card-model {
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 600;
-      padding: 2px 8px;
-      border-radius: 8px;
+      padding: 2px 7px;
+      border-radius: 7px;
       background: rgba(59, 130, 246, 0.15);
       color: #60a5fa;
       border: 1px solid rgba(59, 130, 246, 0.3);
@@ -284,7 +285,7 @@
 
     .top-item-name {
       color: var(--text-main);
-      max-width: 220px;
+      max-width: 210px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -401,12 +402,20 @@
     bindNativeDrag(pillBtn);
     bindNativeDrag(cardDragBar);
 
-    // 原生回调：当用户单纯点击未拖动时由 Cocoa 触发
+    // 原生回调：点击触发切换展开/收起
     window.toggleExpandFromNative = function() {
       isOpen = !isOpen;
       detailCard.classList.toggle('open', isOpen);
       if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.capsuleApp) {
         window.webkit.messageHandlers.capsuleApp.postMessage({ action: 'setExpanded', expanded: isOpen });
+      }
+    };
+
+    // 原生回调：用户在外部点击其他 App（如微信/浏览器）时自动收起并释放屏幕
+    window.collapseFromNative = function() {
+      if (isOpen) {
+        isOpen = false;
+        detailCard.classList.remove('open');
       }
     };
 

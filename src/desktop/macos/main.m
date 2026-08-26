@@ -5,6 +5,7 @@
 @property (strong, nonatomic) NSPanel *window;
 @property (strong, nonatomic) WKWebView *webView;
 @property (assign, nonatomic) BOOL isExpanded;
+@property (strong, nonatomic) id globalClickMonitor;
 @end
 
 @implementation CapsuleAppDelegate
@@ -13,9 +14,9 @@
     NSScreen *screen = [NSScreen mainScreen];
     NSRect screenRect = screen ? [screen visibleFrame] : NSMakeRect(0, 0, 1440, 900);
 
-    // 默认常态小胶囊尺寸：紧凑型 210 x 48，绝不遮挡外部多余空间
-    CGFloat width = 210;
-    CGFloat height = 48;
+    // 默认常态小胶囊尺寸：精确实体尺寸 200 x 42，严禁占用屏幕任何多余像素
+    CGFloat width = 200;
+    CGFloat height = 42;
     CGFloat x = screenRect.origin.x + screenRect.size.width - width - 20;
     CGFloat y = screenRect.origin.y + screenRect.size.height - height - 30;
 
@@ -39,7 +40,7 @@
                                        NSWindowCollectionBehaviorStationary |
                                        NSWindowCollectionBehaviorIgnoresCycle];
 
-    // 配置透明 WebKit 视图与通信通道
+    // 配置透明 WebKit 视图
     WKUserContentController *userContent = [[WKUserContentController alloc] init];
     [userContent addScriptMessageHandler:self name:@"capsuleApp"];
 
@@ -52,6 +53,22 @@
 
     [self.window.contentView addSubview:self.webView];
 
+    // 关键特性：全局点击监听器。当卡片展开时，只要用户在微信/浏览器等外部点击，卡片立刻自动收起并释放屏幕！
+    __weak typeof(self) weakSelf = self;
+    self.globalClickMonitor = [NSEvent addGlobalMonitorForEventsMatchingMask:NSEventMaskLeftMouseDown | NSEventMaskRightMouseDown
+                                                                     handler:^(NSEvent *event) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (strongSelf && strongSelf.isExpanded) {
+            NSPoint mouseLocation = [NSEvent mouseLocation];
+            if (!NSPointInRect(mouseLocation, strongSelf.window.frame)) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [strongSelf.webView evaluateJavaScript:@"if(window.collapseFromNative) window.collapseFromNative();" completionHandler:nil];
+                    [strongSelf updateExpandedState:NO];
+                });
+            }
+        }
+    }];
+
     // 加载本地 Capsule 界面
     NSURL *url = [NSURL URLWithString:@"http://127.0.0.1:8765/capsule"];
     NSURLRequest *request = [NSURLRequest requestWithURL:url];
@@ -61,21 +78,21 @@
     [self.window orderFrontRegardless];
 }
 
-// 动态调整窗口尺寸（展开 370x410 vs 收起 210x48），锚定右上角位置不变
+// 动态调整窗口尺寸（展开 360x390 vs 收起 200x42），锚定右上角位置不变
 - (void)updateExpandedState:(BOOL)expanded {
     self.isExpanded = expanded;
     NSRect frame = self.window.frame;
     CGFloat topY = frame.origin.y + frame.size.height;
     CGFloat rightX = frame.origin.x + frame.size.width;
 
-    CGFloat newWidth = expanded ? 370 : 210;
-    CGFloat newHeight = expanded ? 410 : 48;
+    CGFloat newWidth = expanded ? 360 : 200;
+    CGFloat newHeight = expanded ? 390 : 42;
 
     NSRect newFrame = NSMakeRect(rightX - newWidth, topY - newHeight, newWidth, newHeight);
     [self.window setFrame:newFrame display:YES animate:NO];
 }
 
-// 原生 macOS 全局丝滑拖拽循环（彻底解决上下拉失灵问题）
+// 原生 macOS 全局丝滑拖拽循环
 - (void)handleGlobalDrag {
     NSWindow *win = self.window;
     NSPoint initialMouse = [NSEvent mouseLocation];
@@ -104,10 +121,10 @@
             newFrame.origin.y += deltaY;
             [win setFrameOrigin:newFrame.origin];
         } else if (event.type == NSEventTypeLeftMouseUp) {
-            // 如果没有发生有效拖拽位移，说明是单纯点击，触发展开/收起
+            // 如果没有发生拖拽位移，说明是单纯点击，触发展开/收起
             if (!hasMoved) {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    [self.webView evaluateJavaScript:@"window.toggleExpandFromNative()" completionHandler:nil];
+                    [self.webView evaluateJavaScript:@"if(window.toggleExpandFromNative) window.toggleExpandFromNative();" completionHandler:nil];
                 });
             }
             break;
@@ -129,6 +146,12 @@
             BOOL expanded = [body[@"expanded"] boolValue];
             [self updateExpandedState:expanded];
         }
+    }
+}
+
+- (void)dealloc {
+    if (self.globalClickMonitor) {
+        [NSEvent removeMonitor:self.globalClickMonitor];
     }
 }
 
